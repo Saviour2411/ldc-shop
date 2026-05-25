@@ -68,7 +68,14 @@ jobs:
           install -m 700 -d ~/.ssh
           printf '%s\n' "${{ secrets.SERVER_SSH_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
+          ssh-keygen -y -f ~/.ssh/deploy_key >/dev/null
           ssh-keyscan -p "${{ env.SERVER_PORT }}" -H "${{ secrets.SERVER_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Test SSH login
+        shell: bash
+        run: |
+          set -euo pipefail
+          ssh -i "$HOME/.ssh/deploy_key" -p "${{ env.SERVER_PORT }}" -o BatchMode=yes -o ConnectTimeout=20 "${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}" "echo ssh_ok"
 
       - name: Copy deploy script
         shell: bash
