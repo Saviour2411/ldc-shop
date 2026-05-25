@@ -74,7 +74,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          SSH_OPTS="-i ~/.ssh/deploy_key -p ${{ env.SERVER_PORT }} -o BatchMode=yes -o ConnectTimeout=20 -o ServerAliveInterval=10 -o ServerAliveCountMax=3"
+          SSH_OPTS="-i $HOME/.ssh/deploy_key -p ${{ env.SERVER_PORT }} -o BatchMode=yes -o ConnectTimeout=20 -o ServerAliveInterval=10 -o ServerAliveCountMax=3"
           ssh ${SSH_OPTS} "${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}" "mkdir -p '${DEPLOY_DIR}/deploy'"
           scp -i ~/.ssh/deploy_key -P "${{ env.SERVER_PORT }}" -o BatchMode=yes -o ConnectTimeout=20 -o ServerAliveInterval=10 -o ServerAliveCountMax=3 deploy/server-deploy.sh "${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:${DEPLOY_DIR}/deploy/server-deploy.sh"
 
@@ -82,5 +82,5 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          SSH_OPTS="-i ~/.ssh/deploy_key -p ${{ env.SERVER_PORT }} -o BatchMode=yes -o ConnectTimeout=20 -o ServerAliveInterval=10 -o ServerAliveCountMax=3"
+          SSH_OPTS="-i $HOME/.ssh/deploy_key -p ${{ env.SERVER_PORT }} -o BatchMode=yes -o ConnectTimeout=20 -o ServerAliveInterval=10 -o ServerAliveCountMax=3"
           ssh ${SSH_OPTS} "${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}" "chmod +x '${DEPLOY_DIR}/deploy/server-deploy.sh' && '${DEPLOY_DIR}/deploy/server-deploy.sh'"
