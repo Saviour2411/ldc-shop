@@ -18,6 +18,7 @@ env:
   IMAGE_NAME: saviour2411/ldc-shop
   DEPLOY_DIR: /root/proj/ldc-shop
   SERVER_PORT: 22748
+  SERVER_HOST_KEY: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMOH0kkBWz/VeSs6Z9zh0XtmPISOQjdue+2R+pdV4+N/
 
 jobs:
   build-and-deploy:
@@ -69,25 +70,25 @@ jobs:
           printf '%s\n' "${{ secrets.SERVER_SSH_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
           ssh-keygen -y -f ~/.ssh/deploy_key >/dev/null
-          ssh-keyscan -p "${{ env.SERVER_PORT }}" -H "${{ secrets.SERVER_HOST }}" >> ~/.ssh/known_hosts
+          printf '[%s]:%s %s\n' "${{ secrets.SERVER_HOST }}" "${{ env.SERVER_PORT }}" "${{ env.SERVER_HOST_KEY }}" >> ~/.ssh/known_hosts
 
       - name: Test SSH login
         shell: bash
         run: |
           set -euo pipefail
-          ssh -vvv -i "$HOME/.ssh/deploy_key" -p "${{ env.SERVER_PORT }}" -o BatchMode=yes -o ConnectTimeout=20 -o PreferredAuthentications=publickey -o PasswordAuthentication=no -o KbdInteractiveAuthentication=no "${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}" "echo ssh_ok"
+          ssh -i "$HOME/.ssh/deploy_key" -p "${{ env.SERVER_PORT }}" -o BatchMode=yes -o ConnectTimeout=20 -o IdentitiesOnly=yes -o PreferredAuthentications=publickey -o PasswordAuthentication=no -o KbdInteractiveAuthentication=no "${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}" "echo ssh_ok"
 
       - name: Copy deploy script
         shell: bash
         run: |
           set -euo pipefail
-          SSH_OPTS="-i $HOME/.ssh/deploy_key -p ${{ env.SERVER_PORT }} -o BatchMode=yes -o ConnectTimeout=20 -o ServerAliveInterval=10 -o ServerAliveCountMax=3 -o PreferredAuthentications=publickey -o PasswordAuthentication=no -o KbdInteractiveAuthentication=no"
+          SSH_OPTS="-i $HOME/.ssh/deploy_key -p ${{ env.SERVER_PORT }} -o BatchMode=yes -o ConnectTimeout=20 -o ServerAliveInterval=10 -o ServerAliveCountMax=3 -o IdentitiesOnly=yes -o PreferredAuthentications=publickey -o PasswordAuthentication=no -o KbdInteractiveAuthentication=no"
           ssh ${SSH_OPTS} "${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}" "mkdir -p '${DEPLOY_DIR}/deploy'"
-          scp -i ~/.ssh/deploy_key -P "${{ env.SERVER_PORT }}" -o BatchMode=yes -o ConnectTimeout=20 -o ServerAliveInterval=10 -o ServerAliveCountMax=3 -o PreferredAuthentications=publickey -o PasswordAuthentication=no -o KbdInteractiveAuthentication=no deploy/server-deploy.sh "${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:${DEPLOY_DIR}/deploy/server-deploy.sh"
+          scp -i ~/.ssh/deploy_key -P "${{ env.SERVER_PORT }}" -o BatchMode=yes -o ConnectTimeout=20 -o ServerAliveInterval=10 -o ServerAliveCountMax=3 -o IdentitiesOnly=yes -o PreferredAuthentications=publickey -o PasswordAuthentication=no -o KbdInteractiveAuthentication=no deploy/server-deploy.sh "${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:${DEPLOY_DIR}/deploy/server-deploy.sh"
 
       - name: Deploy on server
         shell: bash
         run: |
           set -euo pipefail
-          SSH_OPTS="-i $HOME/.ssh/deploy_key -p ${{ env.SERVER_PORT }} -o BatchMode=yes -o ConnectTimeout=20 -o ServerAliveInterval=10 -o ServerAliveCountMax=3 -o PreferredAuthentications=publickey -o PasswordAuthentication=no -o KbdInteractiveAuthentication=no"
+          SSH_OPTS="-i $HOME/.ssh/deploy_key -p ${{ env.SERVER_PORT }} -o BatchMode=yes -o ConnectTimeout=20 -o ServerAliveInterval=10 -o ServerAliveCountMax=3 -o IdentitiesOnly=yes -o PreferredAuthentications=publickey -o PasswordAuthentication=no -o KbdInteractiveAuthentication=no"
           ssh ${SSH_OPTS} "${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}" "chmod +x '${DEPLOY_DIR}/deploy/server-deploy.sh' && '${DEPLOY_DIR}/deploy/server-deploy.sh'"
