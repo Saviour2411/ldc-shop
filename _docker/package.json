@@ -1,6 +1,6 @@
 {
   "name": "ldc-shop-docker",
-  "version": "1.2.9-Docker",
+  "version": "1.4.1-Docker",
   "private": true,
   "scripts": {
     "dev": "next dev",
